@@ -114,5 +114,3 @@ front = obj.front_view_radar()
 hind = obj.hind_view_radar()
 right = obj.right_side_radar()
 left = obj.left_side_radar()
-
-print(front)

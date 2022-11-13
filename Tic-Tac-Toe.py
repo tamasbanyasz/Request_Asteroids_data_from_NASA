@@ -23,10 +23,8 @@ class Map:
 
 
 class Player:
-    def __init__(self, signs, count):
+    def __init__(self, signs):
         self.sign = signs
-        self.row_n_col = self.player_number(count)
-        self.sign = self.player_sign(count)
 
     def player_number(self, count):
         number_1 = int(input(f"Your turn {self.sign[count]}. Row: "))
@@ -35,20 +33,18 @@ class Player:
         return [number_1, number_2]
 
     def player_sign(self, count):
-        return f"{self.sign[count]}"
+        return self.sign[count]
 
 
 class Game:
     def __init__(self, signs):
         self.signs = signs
         self.map = Map()
+        self.plyr = Player(self.signs)
         self.count = 0
-        self.plyr = Player(self.signs, self.count)
 
     def player_win(self, sign):
         idx = [i for i in range(len(self.map.board))]
-
-        win = False
 
         index = 0
         while index <= len(idx) - 1:
@@ -57,14 +53,12 @@ class Game:
             diag1 = np.all(self.map.board[idx, idx] == sign)
             diag2 = np.all(self.map.board[idx[::-1], idx] == sign)
 
+            index += 1
+
             if np.any([rows, cols, diag1, diag2]):
-                win = True
-                break
+                return True
 
-            else:
-                index += 1
-
-        return win
+        return False
 
     def player_turn(self):
         if self.count < len(self.signs) - 1:
@@ -89,13 +83,13 @@ class Game:
                 print('DRAW!')
                 break
 
-            if not self.map.valid_rows_n_cols(self.plyr.row_n_col, self.plyr.sign):
+            if not self.map.valid_rows_n_cols(self.plyr.player_number(self.count), self.plyr.player_sign(self.count)):
                 print("WRONG!")
                 self.count -= 1
 
-            if self.player_win(self.plyr.sign):
+            if self.player_win(self.plyr.player_sign(self.count)):
                 self.map.print_map()
-                print(f'Player {self.plyr.sign} WON!')
+                print(f'Player {self.plyr.player_sign(self.count)} WON!')
                 break
 
             self.player_turn()

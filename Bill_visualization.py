@@ -1,10 +1,27 @@
 import tkinter as tk
 from tkinter import *
-import matplotlib.pyplot as plt
+from tkinter import messagebox
+import plotly.express as px
 from datetime import datetime
 import pandas as pd
 import os.path
 import json
+
+
+class Visualization:
+    def __init__(self, df, title):
+        tf = px.data.gapminder()
+        print(tf)
+
+        self.fig = px.line(df, x=df.Years, y=df.columns, hover_data={"Years": "|#%B,%Y"},
+                           title=title, labels={"variable": "Bills", "value": "Amount", "Years": "Date", })
+
+        self.fig.update_xaxes(
+            dtick="M1",
+            tickformat="%b\n%Y"
+        )
+
+        self.fig.show()
 
 
 class JsonFunctions:
@@ -25,15 +42,17 @@ class JsonFunctions:
             pass
         else:
             python_dict = {
-                'Years': ['2021.01', '2021.02', '2021.03', '2021.04', '2021.05', '2021.06', '2021.07', '2021.08',
-                          '2021.09', '2021.10',
-                          '2021.11', '2021.12', '2022.01', '2022.02', '2022.03', '2022.04', '2022.05', '2022.06',
-                          '2022.07'],
-                'Water': [2000, 1000, 250, 230, 207, 270, 230, 201, 250, 270, 204, 2800, 2008, 276, 211, 205, 204, 220,
-                          501],
-                'Electricity': [3000, 500, 300, 304, 302, 360, 300, 302, 305, 370, 355, 3060, 300, 309, 322, 306, 306,
-                                320, 310],
-                'Gas': [4000, 800, 401, 401, 450, 401, 400, 403, 450, 477, 402, 400, 490, 403, 440, 407, 401, 420, 410]
+                'Years': ['2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06', '2021-07', '2021-08',
+                          '2021-09', '2021-10',
+                          '2021-11', '2021-12', '2022-01', '2022-02', '2022-03', '2022-04', '2022-05', '2022-06',
+                          '2022-07', '2022-08', '2022-09', '2022-10'],
+                'Water': [2000, 1000, 250, 770, 330, 920, 230, 550, 1200, 1500, 204, 2800, 2008, 800, 150, 205, 340,
+                          400, 501, 600, 800, 500],
+
+                'Electricity': [3000, 2000, 1500, 1100, 800, 700, 600, 800, 900, 1000, 1100, 3060, 300, 500, 600, 900,
+                                850, 320, 310, 450, 550, 600],
+                'Gas': [4000, 800, 401, 401, 450, 401, 400, 403, 450, 477, 402, 400, 490, 403, 440, 407, 401, 420, 410,
+                        500, 1000, 1255]
                 }
 
             with open('bills.json', 'w', encoding='utf-8') as f:
@@ -42,224 +61,183 @@ class JsonFunctions:
         return file_exists
 
 
-class GetDataFrame:
-    def __init__(self, json_object):
-        self.df = pd.DataFrame.from_dict(json_object)
-        self.years = self.df['Years']
+class BillsLabel:
+    def __init__(self, tk_window):
+        self.bill_label = Label(tk_window, text='Bills', fg='black', font=('Arial', 20))
+        self.bill_label.pack()
 
 
-class Visualization:
-    def __init__(self):
-        pass
+class WaterLabel:
+    def __init__(self, tk_window):
+        self.water_entry = Entry(tk_window)
 
-    def visualization(self, dt):
-        plt.figure(figsize=(8, 4))
-        ax1 = plt.subplot(111)
-        ax1.plot(dt.Years, dt.Water, 'o-', color='blue')
-        ax1.plot(dt.Years, dt.Electricity, 'o-', color='yellow')
-        ax1.plot(dt.Years, dt.Gas, 'o-', color='black')
+        self.water_label = Label(tk_window, text='Water :', fg='Blue', font=('Ariel', 16))
+        self.water_label.place(x=80, y=60)
 
-        ax1.spines['top'].set_visible(False)
-        ax1.spines['right'].set_visible(False)
-
-        plt.legend(['Water', 'Electricity', 'Gas'], loc="upper right", shadow=True)
-        plt.show()
-
-
-class TkRoot:
-    def __init__(self):
-        self.window = tk.Tk()
-
-        self.window.geometry("800x600")
-        self.window.title("Bányász Tamás")
-        self.window.resizable(False, False)
-
-
-class DatetToDatesLabel(TkRoot):
-    def __init__(self):
-        super().__init__()
-        self.date_to_dates_start = Entry(self.window)
-        self.date_to_dates_end = Entry(self.window)
-
-    def date_to_dates_label(self):
-        date_to_dates_label = Label(self.window, text='Date to date :', fg='Black', font=('Ariel', 16))
-        date_to_dates_label.place(x=400, y=167)
-
-    def date_to_dates_start_place(self):
-        self.date_to_dates_start.place(x=580, y=172)
-
-    def date_to_dates_end_place(self):
-        self.date_to_dates_end.place(x=580, y=194)
-
-
-class BillsLabel(TkRoot):
-    def __init__(self):
-        super().__init__()
-
-    def bills_place(self):
-        bill_label = Label(self.window, text='Bills', fg='black', font=('Arial', 20))
-        bill_label.pack()
-
-
-class WaterLabel(TkRoot):
-    def __init__(self):
-        super().__init__()
-        self.water_entry = Entry(self.window)
-
-    def water_label_place(self):
-        water_label = Label(self.window, text='Water :', fg='Blue', font=('Ariel', 16))
-        water_label.place(x=80, y=60)
-
-    def water_entry_place(self):
         self.water_entry.place(x=190, y=67)
 
+    def get_water_amount(self):
+        water_amount = self.water_entry.get()
+        self.water_entry.delete(0, END)
 
-class ElectricityLabel(TkRoot):
-    def __init__(self):
-        super().__init__()
-        self.electricity_entry = Entry(self.window)
+        return water_amount
 
-    def electricity_label_place(self):
-        electricity_label = Label(self.window, text='Electricity :', fg='black', font=('Ariel', 16))
-        electricity_label.place(x=80, y=113)
 
-    def electricity_entry_place(self):
+class ElectricityLabel:
+    def __init__(self, tk_window):
+        self.electricity_entry = Entry(tk_window)
+
+        self.electricity_label = Label(tk_window, text='Electricity :', fg='black', font=('Ariel', 16))
+        self.electricity_label.place(x=80, y=113)
+
         self.electricity_entry.place(x=190, y=120)
 
+    def get_electricity_amount(self):
+        electricity_amount = self.electricity_entry.get()
+        self.electricity_entry.delete(0, END)
 
-class GasLabel(TkRoot):
-    def __init__(self):
-        super().__init__()
-        self.gas_entry = Entry(self.window)
+        return electricity_amount
 
-    def gas_label_place(self):
-        gas_label = Label(self.window, text='Gas :', fg='Brown', font=('Ariel', 16))
-        gas_label.place(x=80, y=166)
 
-    def gas_entry_place(self):
+class GasLabel:
+    def __init__(self, tk_window):
+        self.gas_entry = Entry(tk_window)
+
+        self.gas_label = Label(tk_window, text='Gas :', fg='Brown', font=('Ariel', 16))
+        self.gas_label.place(x=80, y=166)
+
         self.gas_entry.place(x=190, y=173)
 
+    def get_gas_amount(self):
+        gas_amount = self.gas_entry.get()
+        self.gas_entry.delete(0, END)
 
-class DateToDateBills(GetDataFrame, Visualization):
-    def __init__(self, json_object):
-        super().__init__(json_object)
-
-
-class AllBills(GetDataFrame, Visualization):
-    def __init__(self, json_object):
-        super().__init__(json_object)
-
-    def all_bills_visualization(self):
-        self.visualization(self.df)
+        return gas_amount
 
 
-class YearlyBills(GetDataFrame, Visualization):
-    def __init__(self, json_object):
-        super().__init__(json_object)
-        self.current_year = datetime.now().strftime("%Y")
+class DatetToDatesLabel:
+    def __init__(self, tk_window):
+        self.date_to_dates_start = Entry(tk_window)
+        self.date_to_dates_end = Entry(tk_window)
 
-    def select_year_of_indexes(self):
-        index = []
-        for i in json_object['Years']:
-            if self.current_year in i:
-                idx = json_object['Years'].index(i)
-                index.append(idx)
-        return index
+        self.date_to_dates_label = Label(tk_window, text='Date to date :', fg='Black', font=('Ariel', 16))
 
-    def get_year(self):
-        return self.df.loc[self.select_year_of_indexes()[0]:self.select_year_of_indexes()[-1]]
+        self.date_to_dates_label.place(x=400, y=167)
+        self.date_to_dates_start.place(x=580, y=172)
+        self.date_to_dates_end.place(x=580, y=194)
 
-    def yearly_vis(self):
-        self.visualization(self.get_year())
+    def get_start_date(self):
+        start_date = self.date_to_dates_start.get()
+        self.date_to_dates_start.delete(0, END)
+
+        return start_date
+
+    def get_end_date(self):
+        end_date = self.date_to_dates_end.get()
+        self.date_to_dates_end.delete(0, END)
+
+        return end_date
 
 
-class Submit(GetDataFrame, WaterLabel, ElectricityLabel, GasLabel):
-    def __init__(self):
-        super().__init__()
+class DateToDateBills:
+    def __init__(self, tk_window):
+        self.date_to_date = DatetToDatesLabel(tk_window)
+
+    def selected_dates(self, jsonfile):
+        start_date = self.date_to_date.get_start_date()
+        end_date = self.date_to_date.get_end_date()
+        years = [i for i in jsonfile['Years']]
+
+        if not years.__contains__(start_date and end_date):
+            messagebox.showerror("Invalid", "There is no such date.")
+            return window.mainloop()
+
+        start_date_index = jsonfile.index[jsonfile['Years'] == start_date]
+        end_date_index = jsonfile.index[jsonfile['Years'] == end_date]
+
+        if start_date_index > end_date_index:
+            messagebox.showerror("Invalid", "Incorrect date format.")
+            return window.mainloop()
+
+        selected_bills = jsonfile[start_date_index[0]:end_date_index[0] + 1]
+        Visualization(selected_bills, "Date to date")
 
 
-class DateToDatesButton(TkRoot):
-    def __init__(self):
-        super().__init__()
-        self.date_to_dates_button = tk.Button(self.window, text='Show date to date',
-                                              command=lambda: None,
+class YearlyBills:
+    def __init__(self, jsonfile):
+        self.index = []
+
+        for index, value in enumerate(jsonfile['Years']):
+            if datetime.now().strftime("%Y") in value:
+                self.index.append(index)
+
+        self.yearly_bills = jsonfile.loc[self.index[0]:self.index[-1]]
+
+        Visualization(self.yearly_bills, "Yearly bills")
+
+
+class AllBills:
+    def __init__(self, jsonfile):
+        pass
+
+        Visualization(jsonfile, "All Bills")
+
+
+class DateToDatesButton:
+    def __init__(self, tk_window, jsonfile):
+        self.date_to_date_bills = DateToDateBills(tk_window)
+        self.date_to_dates_button = tk.Button(tk_window, text='Show date to date',
+                                              command=lambda: self.date_to_date_bills.selected_dates(jsonfile),
                                               font=('Arial', 16))
 
-    def date_to_dates_button_place(self):
         self.date_to_dates_button.place(x=550, y=230)
 
 
-class AllBillsButton(TkRoot):
-    def __init__(self):
-        super().__init__()
-        self.all_bills_button = tk.Button(self.window, text='All',
-                                          command=lambda: AllBills(json_object).all_bills_visualization(),
+class AllBillsButton:
+    def __init__(self, tk_window, jsonfile):
+        self.all_bills_button = tk.Button(tk_window, text='All',
+                                          command=lambda: AllBills(jsonfile),
                                           font=('Arial', 16))
 
-    def all_bills_button_place(self):
         self.all_bills_button.place(x=210, y=480)
 
 
-class YearlyButton(TkRoot):
-    def __init__(self):
-        super().__init__()
-        self.yearly_button = tk.Button(self.window, text='Yearly',
-                                       command=lambda: YearlyBills(json_object).yearly_vis(), font=('Arial', 16))
+class YearlyButton:
+    def __init__(self, tk_window, jsonfile):
 
-    def yearly_button_place(self):
+        self.yearly_button = tk.Button(tk_window, text='Yearly',
+                                       command=lambda: YearlyBills(jsonfile), font=('Arial', 16))
+
         self.yearly_button.place(x=211, y=350)
 
 
-class SubmitButton(TkRoot):
-    def __init__(self):
-        super().__init__()
-        self.submit_button = tk.Button(self.window, text='Submit', command=lambda: None, font=('Arial', 16))
+class SubmitButton:
+    def __init__(self, tk_window, jsonfile):
+        self.submit_button = tk.Button(tk_window, text='Submit', command=lambda: None,
+                                       font=('Arial', 16))
 
-    def submit_button_place(self):
         self.submit_button.place(x=210, y=220)
 
 
-class CalculatorLabels(DatetToDatesLabel, BillsLabel, WaterLabel, ElectricityLabel, GasLabel):
-    def __init__(self):
-        super().__init__()
-
-        self.bills_place()
-
-        self.date_to_dates_label()
-        self.date_to_dates_start_place()
-        self.date_to_dates_end_place()
-
-        self.water_label_place()
-        self.water_entry_place()
-
-        self.electricity_label_place()
-        self.electricity_entry_place()
-
-        self.gas_label_place()
-        self.gas_entry_place()
-
-
-class CalculatorButtons(DateToDatesButton, AllBillsButton, YearlyButton, SubmitButton):
-    def __init__(self):
-        super().__init__()
-
-        self.date_to_dates_button_place()
-        self.all_bills_button_place()
-        self.yearly_button_place()
-        self.submit_button_place()
-
-
-class CalculatorDisplay(CalculatorLabels, CalculatorButtons):
-    def __init__(self):
-        super().__init__()
-
-        self.window.mainloop()
-
+window = tk.Tk()
+window.geometry("800x600")
+window.title("Bányász Tamás")
+window.resizable(False, False)
 
 JsonFunctions().json_exists()
 
-json_object = JsonFunctions().read_json()
+json_obj = JsonFunctions().read_json()
+json_object = pd.DataFrame(json_obj)
 
-GetDataFrame(json_object)
+BillsLabel(window)
+WaterLabel(window)
+ElectricityLabel(window)
+GasLabel(window)
+DatetToDatesLabel(window)
 
-CalculatorDisplay()
+DateToDatesButton(window, json_object)
+SubmitButton(window, json_object)
+YearlyButton(window, json_object)
+AllBillsButton(window, json_object)
+
+window.mainloop()

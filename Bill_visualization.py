@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
@@ -5,14 +6,11 @@ import plotly.express as px
 from datetime import datetime
 import pandas as pd
 import os.path
-import json
+import orjson
 
 
 class Visualization:
     def __init__(self, df, title):
-        tf = px.data.gapminder()
-        print(tf)
-
         self.fig = px.line(df, x=df.Years, y=df.columns, hover_data={"Years": "|#%B,%Y"},
                            title=title, labels={"variable": "Bills", "value": "Amount", "Years": "Date", })
 
@@ -30,10 +28,10 @@ class JsonFunctions:
 
     @staticmethod
     def read_json():
-        with open('bills.json', 'r', encoding='utf-8') as f:
-            json_file = json.load(f)
+        with open("bills.json", "rb") as f:
+            json_data = orjson.loads(f.read())
 
-            return json_file
+            return json_data
 
     @staticmethod
     def json_exists():
@@ -41,7 +39,7 @@ class JsonFunctions:
         if file_exists:
             pass
         else:
-            python_dict = {
+            test_dict = {
                 'Years': ['2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06', '2021-07', '2021-08',
                           '2021-09', '2021-10',
                           '2021-11', '2021-12', '2022-01', '2022-02', '2022-03', '2022-04', '2022-05', '2022-06',
@@ -55,8 +53,8 @@ class JsonFunctions:
                         500, 1000, 1255]
                 }
 
-            with open('bills.json', 'w', encoding='utf-8') as f:
-                json.dump(python_dict, f, indent=2)
+            with open("bills.json", "wb") as f:
+                f.write(orjson.dumps(test_dict))
 
         return file_exists
 
@@ -163,6 +161,27 @@ class DateToDateBills:
         Visualization(selected_bills, "Date to date")
 
 
+class SubmitAmounts:
+    def __init__(self, tk_window):
+        self.water = WaterLabel(tk_window)
+        self.electricity = ElectricityLabel(tk_window)
+        self.gas = GasLabel(tk_window)
+        self.date_now = datetime.now().strftime("%Y-%m")
+
+    def send_amounts(self):
+        water = self.water.get_water_amount()
+        electricity = self.electricity.get_electricity_amount()
+        gas = self.gas.get_gas_amount()
+
+        if not water.isnumeric() and not electricity.isnumeric() and not gas.isnumeric():
+            messagebox.showerror("Invalid", "Incorrect input.")
+            return window.mainloop()
+
+        amounts = [self.date_now, int(water), int(electricity), int(gas)]
+        print(amounts)
+        print("Not working yet.")
+
+
 class YearlyBills:
     def __init__(self, jsonfile):
         self.index = []
@@ -212,8 +231,9 @@ class YearlyButton:
 
 
 class SubmitButton:
-    def __init__(self, tk_window, jsonfile):
-        self.submit_button = tk.Button(tk_window, text='Submit', command=lambda: None,
+    def __init__(self, tk_window):
+        self.s = SubmitAmounts(tk_window)
+        self.submit_button = tk.Button(tk_window, text='Submit', command=lambda: self.s.send_amounts(),
                                        font=('Arial', 16))
 
         self.submit_button.place(x=210, y=220)
@@ -229,6 +249,7 @@ JsonFunctions().json_exists()
 json_obj = JsonFunctions().read_json()
 json_object = pd.DataFrame(json_obj)
 
+
 BillsLabel(window)
 WaterLabel(window)
 ElectricityLabel(window)
@@ -236,7 +257,7 @@ GasLabel(window)
 DatetToDatesLabel(window)
 
 DateToDatesButton(window, json_object)
-SubmitButton(window, json_object)
+SubmitButton(window)
 YearlyButton(window, json_object)
 AllBillsButton(window, json_object)
 

@@ -16,10 +16,11 @@ class INSERTINTO:
         while self.index_of_asteroid < len(self.data[0]):
             self.asteroid = Asteroids(
                 asteroids_name=self.data[0][self.index_of_asteroid],
-                asteroids_close_date=self.data[1][self.index_of_asteroid],
-                asteroids_miss_distance_in_km=self.data[3][self.index_of_asteroid],
-                velocitys_in_km_s=self.data[4][self.index_of_asteroid],
-                asteroids_estimated_diameter_min_in_m=self.data[5][self.index_of_asteroid]
+                close_approach_date_full=self.data[1][self.index_of_asteroid],
+                asteroids_miss_distance_in_km=self.data[2][self.index_of_asteroid],
+                relative_velocity_in_km_s=self.data[3][self.index_of_asteroid],
+                asteroids_estimated_diameter_min_in_m=self.data[4][self.index_of_asteroid],
+                asteroid_is_potentially_dangerous=self.data[5][self.index_of_asteroid]
             )
 
             with Session(self.engine) as session:

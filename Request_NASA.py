@@ -8,7 +8,9 @@ from PYsql2 import INSERTINTO
 
 class AsteroidsVisualization:
     def __init__(self, data_frame):
-        self.fig = px.scatter(pd.DataFrame(data_frame), x="asteroid_miss_distance_in_km", y="velocity_in_km/s",
+        self.fig = px.scatter(pd.DataFrame(data_frame).drop('asteroid_is_potentially_dangerous', axis=1),
+                              x="asteroid_miss_distance_in_km",
+                              y="relative_velocity_in_km/s",
                               size="asteroid_estimated_diameter_min_in_m", color="asteroid_name",
                               hover_name="asteroid_name", log_x=True, size_max=80)
 
@@ -31,11 +33,11 @@ class GetDatasFromNASA:
 class DictOfAttributesOfAsteroids:
     def __init__(self):
         self.dict = {'asteroid_name': [],
-                     'asteroid_close_date': [],
-                     'asteroid_is_potentially': [],
+                     'close_approach_date_full': [],
                      'asteroid_miss_distance_in_km': [],
-                     'velocity_in_km/s': [],
-                     'asteroid_estimated_diameter_min_in_m': []
+                     'relative_velocity_in_km/s': [],
+                     'asteroid_estimated_diameter_min_in_m': [],
+                     'asteroid_is_potentially_dangerous': []
                      }
         self.index_of_asteroid = 0
 
@@ -45,15 +47,15 @@ class DictOfAttributesOfAsteroids:
             asteroids_approach_data = asteroid['close_approach_data'][0]
             asteroids_estimated_diameter = asteroid['estimated_diameter']
 
-            self.dict['asteroid_name'].append(asteroid['name'].replace("'", ""))
-            self.dict['asteroid_close_date'].append(asteroids_approach_data['close_approach_date_full'])
-            self.dict['asteroid_is_potentially'].append(bool(asteroid['is_potentially_hazardous_asteroid']))
+            self.dict['asteroid_name'].append(asteroid['name'].replace("'", "").strip('()').replace("(", ""))
+            self.dict['close_approach_date_full'].append(asteroids_approach_data['close_approach_date_full']),
             self.dict['asteroid_miss_distance_in_km'].append(float(asteroids_approach_data['miss_distance']
                                                                    ['kilometers']))
-            self.dict['velocity_in_km/s'].append(float(asteroids_approach_data['relative_velocity']
-                                                       ['kilometers_per_second']))
+            self.dict['relative_velocity_in_km/s'].append(float(asteroids_approach_data['relative_velocity']
+                                                          ['kilometers_per_second']))
             self.dict['asteroid_estimated_diameter_min_in_m'].append(asteroids_estimated_diameter['meters']
                                                                      ['estimated_diameter_min'])
+            self.dict['asteroid_is_potentially_dangerous'].append(bool(asteroid['is_potentially_hazardous_asteroid']))
 
             self.index_of_asteroid += 1
 
@@ -103,7 +105,7 @@ class AsteroidsSeries:
 
 
 API_KEY = 'diHl0LviLAVDsFhiQQBFeVhGzaypOchuTneOJWXI'
-DATE = '2022-05-02'
+DATE = '2022-12-03'
 json_file_name = "asteroids"
 db_file_name = "asteroids"
 

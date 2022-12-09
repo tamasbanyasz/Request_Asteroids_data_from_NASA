@@ -1,14 +1,17 @@
-import pandas as pd
-import requests
-import ujson
-import os.path
-import plotly.express as px
+from pandas import DataFrame, Series
 from PYsql2 import INSERTINTO
+import plotly.express as px
+from requests import get
+import os.path
+import ujson
 
 
 class AsteroidsVisualization:
     def __init__(self, data_frame):
-        self.fig = px.scatter(pd.DataFrame(data_frame).drop('asteroid_is_potentially_dangerous', axis=1),
+        self.data_frame = DataFrame(data_frame).drop(['asteroid_is_potentially_dangerous', 'close_approach_date_full'],
+                                                     axis=1)
+        
+        self.fig = px.scatter(self.data_frame,
                               x="asteroid_miss_distance_in_km",
                               y="relative_velocity_in_km/s",
                               size="asteroid_estimated_diameter_min_in_m", color="asteroid_name",
@@ -21,9 +24,10 @@ class GetDatasFromNASA:
     def __init__(self, api_key, date):
         self.API_KEY = api_key
         self.DATE = date
-        self.asteroids_data = requests.get(f'https://api.nasa.gov/neo/rest/v1/feed?start_date={self.DATE}&'
-                                           f'end_date={self.DATE}&api_key={self.API_KEY}')
+        self.asteroids_data = get(f'https://api.nasa.gov/neo/rest/v1/feed?start_date={self.DATE}&'
+                                  f'end_date={self.DATE}&api_key={self.API_KEY}')
         self.asteroids_data_in_json = self.asteroids_data.json()
+        print(self.asteroids_data_in_json)
         self.list_of_asteroids = self.asteroids_data_in_json['near_earth_objects'][self.DATE]
 
     def get_list_of_asteroids(self):
@@ -72,7 +76,7 @@ class JSONFileFunctions:
             create_first_an_empty_dict = {}
 
             with open(f'{self.file_name}.json', "w") as f:
-                ujson.dump(create_first_an_empty_dict, f, indent=2)
+                ujson.dump(create_first_an_empty_dict, f, indent=2, sort_keys=True, )
 
     def read_json(self, date, data_frame):
         with open(f'{self.file_name}.json', 'r', encoding='utf-8') as f:
@@ -84,7 +88,7 @@ class JSONFileFunctions:
 
     def write_to_json(self, json_file):
         with open(f'{self.file_name}.json', "w") as f:
-            ujson.dump(json_file, f, indent=2)
+            ujson.dump(json_file, f, indent=2, sort_keys=True)
 
 
 class AsteroidsSeries:
@@ -95,7 +99,7 @@ class AsteroidsSeries:
         self.json_functions = JSONFileFunctions(json_file_name)
 
     def get_asteroids_in_pd_series(self):
-        return pd.Series(self.values.dict)
+        return Series(self.values.dict)
 
     def read_json(self, date, data_frame):
         return self.json_functions.read_json(date, data_frame)
@@ -105,7 +109,7 @@ class AsteroidsSeries:
 
 
 API_KEY = 'diHl0LviLAVDsFhiQQBFeVhGzaypOchuTneOJWXI'
-DATE = '2022-12-03'
+DATE = '2022-12-07'
 json_file_name = "asteroids"
 db_file_name = "asteroids"
 

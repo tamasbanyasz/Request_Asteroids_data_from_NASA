@@ -190,8 +190,8 @@ class SubmitAmounts(JsonFunctions):
 
 class YearlyBills:
     def __init__(self, jsonfile):
-        self.index = []
         self.jsonfile = DataFrame(jsonfile)
+        self.index = []
 
         for index, value in enumerate(self.jsonfile['Years']):
             if datetime.now().strftime("%Y") in value:

@@ -32,7 +32,7 @@ class RequestGUI:
         self.data_entry = DateEntry(self.window)
         self.scrollbar = Scrollbar(self.frame, orient=VERTICAL)
         self.listbox = Listbox(self.frame, yscrollcommand=self.scrollbar.set, height=15,
-                               selectmode=EXTENDED,
+                               selectmode=SINGLE,
                                width=25,
                                bd=4,
                                bg="White",

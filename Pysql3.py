@@ -39,35 +39,38 @@ class AsteroidsVisualization:
 
 class ListOfAttributesOfAsteroids:
     def __init__(self):
-        self.df2 = DataFrame(columns=['asteroid_name',
-                                      'close_approach_date_full',
-                                      'asteroid_miss_distance_in_km',
-                                      'relative_velocity_in_km/s',
-                                      'asteroid_estimated_diameter_min_in_m',
-                                      'asteroid_is_potentially_dangerous'])
+        self.asteroids_df = DataFrame(columns=['asteroid_name',
+                                               'close_approach_date_full',
+                                               'asteroid_miss_distance_in_km',
+                                               'relative_velocity_in_km/s',
+                                               'asteroid_estimated_diameter_min_in_m',
+                                               'asteroid_is_potentially_dangerous'])
 
-        self.df2['asteroid_is_potentially_dangerous'] = self.df2['asteroid_is_potentially_dangerous'].astype('bool')
+        self.asteroids_df['asteroid_is_potentially_dangerous'] = self.asteroids_df['asteroid_is_potentially_dangerous']\
+            .astype('bool')
 
     def append_asteroid_attributes_to_dicts_in_list(self, list_of_asteroids):
         df = DataFrame(list_of_asteroids, columns=['name', 'close_approach_data', 'estimated_diameter',
                                                    'is_potentially_hazardous_asteroid'])
-        self.df2['asteroid_name'] = [i.replace("'", "").strip('()').replace("(", "") for i in df['name']]
-        self.df2['close_approach_date_full'] = [i[0]['close_approach_date_full'] for i in df['close_approach_data']]
-        self.df2['asteroid_miss_distance_in_km'] = [round(float(i[0]['miss_distance']
-                                                                ['kilometers']), 2) for i in df['close_approach_data']]
-        self.df2['relative_velocity_in_km/s'] = [round(float(i[0]['relative_velocity']
-                                                 ['kilometers_per_second']), 2) for i in df['close_approach_data']]
-        self.df2['asteroid_estimated_diameter_min_in_m'] = [round(float(i['meters']
-                                                            ['estimated_diameter_min']), 2)
-                                                            for i in df['estimated_diameter']]
-        self.df2['asteroid_is_potentially_dangerous'] = df['is_potentially_hazardous_asteroid']
+        self.asteroids_df['asteroid_name'] = [i.replace("'", "").strip('()').replace("(", "") for i in df['name']]
+        self.asteroids_df['close_approach_date_full'] = [i[0]['close_approach_date_full']
+                                                         for i in df['close_approach_data']]
+        self.asteroids_df['asteroid_miss_distance_in_km'] = [round(float(i[0]['miss_distance']
+                                                             ['kilometers']), 2) for i in df['close_approach_data']]
+        self.asteroids_df['relative_velocity_in_km/s'] = [round(float(i[0]
+                                                          ['relative_velocity']['kilometers_per_second']),
+                                                            2) for i in df['close_approach_data']]
+        self.asteroids_df['asteroid_estimated_diameter_min_in_m'] = [round(float(i['meters']
+                                                                     ['estimated_diameter_min']), 2)
+                                                                     for i in df['estimated_diameter']]
+        self.asteroids_df['asteroid_is_potentially_dangerous'] = df['is_potentially_hazardous_asteroid']
+        self.asteroids_df['asteroid_estimated_diameter_min_in_m'] = \
+            self.asteroids_df['asteroid_estimated_diameter_min_in_m'].astype('float16')
+        self.asteroids_df['relative_velocity_in_km/s'] = self.asteroids_df['relative_velocity_in_km/s'].astype('float16'
+                                                                                                               )
 
-        self.df2['asteroid_estimated_diameter_min_in_m'] = self.df2['asteroid_estimated_diameter_min_in_m'].astype(
-            'float16')
-        self.df2['relative_velocity_in_km/s'] = self.df2['relative_velocity_in_km/s'].astype('float16')
-
-        print(self.df2.to_string())
-        print(self.df2.info())
+        print(self.asteroids_df.to_string())
+        print(self.asteroids_df.info())
 
 
 class GetDatasFromNASA(ListOfAttributesOfAsteroids):
@@ -154,7 +157,7 @@ class DataOperation:
 
     def store_selected_date_and_asteroids_temporarily(self, selected_date, list_of_asteroids):
         self.selected_date = selected_date
-        self.asteroids_df = concat([list_of_asteroids.df2])
+        self.asteroids_df = concat([list_of_asteroids.asteroids_df])
 
     def requesting_asteroids(self, selected_date):
         self.clear_listbox_and_selected_item()

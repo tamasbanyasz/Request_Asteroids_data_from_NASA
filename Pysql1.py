@@ -3,6 +3,7 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Float
 from sqlalchemy import BOOLEAN
+from sqlalchemy import DateTime
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -13,7 +14,7 @@ class Asteroids(Base):
 
     id = Column(Integer, primary_key=True)
     asteroids_name = Column(String(50))
-    close_approach_date_full = Column(String(20))
+    close_approach_date_full = Column(DateTime)
     asteroids_miss_distance_in_km = Column(Float)
     relative_velocity_in_km_s = Column(Float)
     asteroids_estimated_diameter_min_in_m = Column(Float)

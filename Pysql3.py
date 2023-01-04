@@ -1,4 +1,4 @@
-from pandas import DataFrame, concat
+from pandas import DataFrame, concat, to_datetime
 from Pysql2 import InsertInto
 import plotly.express as px
 from requests import get
@@ -37,14 +37,15 @@ class AsteroidsVisualization:
         self.fig.show()
 
 
-class ListOfAttributesOfAsteroids:
+class DataFrameOfAttributesOfAsteroids:
     def __init__(self):
         self.asteroids_df = DataFrame(columns=['asteroid_name',
                                                'close_approach_date_full',
                                                'asteroid_miss_distance_in_km',
                                                'relative_velocity_in_km/s',
                                                'asteroid_estimated_diameter_min_in_m',
-                                               'asteroid_is_potentially_dangerous'])
+                                               'asteroid_is_potentially_dangerous'
+                                               ])
 
         self.asteroids_df['asteroid_is_potentially_dangerous'] = self.asteroids_df['asteroid_is_potentially_dangerous']\
             .astype('bool')
@@ -68,12 +69,14 @@ class ListOfAttributesOfAsteroids:
             self.asteroids_df['asteroid_estimated_diameter_min_in_m'].astype('float16')
         self.asteroids_df['relative_velocity_in_km/s'] = self.asteroids_df['relative_velocity_in_km/s'].astype('float16'
                                                                                                                )
+        self.asteroids_df['close_approach_date_full'] = to_datetime(self.asteroids_df['close_approach_date_full'],
+                                                                    format='%Y-%b-%d %H:%M')
 
         print(self.asteroids_df.to_string())
         print(self.asteroids_df.info())
 
 
-class GetDatasFromNASA(ListOfAttributesOfAsteroids):
+class GetDatasFromNASA(DataFrameOfAttributesOfAsteroids):
     def __init__(self, api_key, selected_date):
         super().__init__()
         self.API_KEY = api_key
@@ -122,6 +125,7 @@ class JSONFileFunctions:
     def read_json(self, selected_date, data_frame):
         with open(f'{self.file_name}.json', 'r', encoding='utf-8') as f:
             json_file = ujson.load(f)
+            data_frame['close_approach_date_full'] = datetime.isoformat(data_frame['close_approach_date_full'])
             data_frame = data_frame.to_dict()
             new_dict = {selected_date: [data_frame]}
             json_file['datas'].append(new_dict)

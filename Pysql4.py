@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
-from Pysql3 import DataOperation, AsteroidsVisualization
+from Pysql3test2 import DataOperation, AsteroidsVisualization
 
 
 class DateEntry:
@@ -56,11 +56,11 @@ class RequestGUI:
         self.window.mainloop()
 
     def display_visualization(self):
-        if self.data_operating.asteroids_df.empty:
+        if self.data_operating.asteroids_df_for_select.empty:
             messagebox.showerror("Invalid", "There is no requested asteroids.")
             return self.window.mainloop()
 
-        AsteroidsVisualization(self.data_operating.asteroids_df)
+        AsteroidsVisualization(self.data_operating.asteroids_df_for_visualization)
 
     def select_date_button(self):
         select_date_button = tk.Button(self.window, text='Select date',
@@ -97,3 +97,4 @@ json_file_name = "asteroids"
 db_file_name = "asteroids"
 
 asteroids_request = RequestGUI(API_KEY, db_file_name, json_file_name)
+

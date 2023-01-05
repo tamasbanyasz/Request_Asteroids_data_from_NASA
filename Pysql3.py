@@ -56,12 +56,12 @@ class DataFrameOfAttributesOfAsteroids:
         self.asteroids_df['asteroid_name'] = [i.replace("'", "").strip('()').replace("(", "")
                                               for i in df['name'].values]
         self.asteroids_df['close_approach_date_full'] = [i[0]['close_approach_date_full']
-                                                         for i in df['close_approach_data']]
+                                                         for i in df['close_approach_data'].values]
         self.asteroids_df['asteroid_miss_distance_in_km'] = [round(float(i[0]['miss_distance']
                                                              ['kilometers']), 2)
                                                              for i in df['close_approach_data'].values]
-        self.asteroids_df['relative_velocity_in_km/s'] = [i[0]
-                                                          ['relative_velocity']['kilometers_per_second']
+        self.asteroids_df['relative_velocity_in_km/s'] = [round(float(i[0]
+                                                          ['relative_velocity']['kilometers_per_second']), 2)
                                                           for i in df['close_approach_data'].values]
         self.asteroids_df['asteroid_estimated_diameter_min_in_m'] = [i['meters']
                                                                      ['estimated_diameter_min']

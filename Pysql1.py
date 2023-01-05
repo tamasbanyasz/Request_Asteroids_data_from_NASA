@@ -26,4 +26,4 @@ class Asteroids(Base):
                f"miss_distance_in_km={self.asteroids_miss_distance_in_km!r}, " \
                f"relative_velocity_in_km/s={self.relative_velocity_in_km_s!r}," \
                f"estimated_diameter_min_in_m={self.asteroids_estimated_diameter_min_in_m!r}," \
-               f"asteroid_is_potentially_dangerous={self.asteroid_is_potentially_dangerous!r})"
+               f"asteroid_is_potentially_dangerous={self.asteroid_is_potentially_dangerous!r}"

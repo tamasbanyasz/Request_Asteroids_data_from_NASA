@@ -13,8 +13,7 @@ class AsteroidsVisualization:
     def __init__(self, data_frame):
         self.data_frame = data_frame.drop(['asteroid_is_potentially_dangerous', 'close_approach_date_full'],
                                           axis=1)
-        self.data_frame['asteroid_miss_distance_in_km'] = self.data_frame['asteroid_miss_distance_in_km'].\
-            astype('int32')
+
         self.data_frame['asteroid_estimated_diameter_min_in_m'] = \
             self.data_frame['asteroid_estimated_diameter_min_in_m'].astype('float32')
         self.data_frame['relative_velocity_in_km/s'] = self.data_frame['relative_velocity_in_km/s'].astype('float32')
@@ -69,7 +68,7 @@ class DataFrameOfAttributesOfAsteroids:
         self.asteroids_df['asteroid_is_potentially_dangerous'] = df['is_potentially_hazardous_asteroid'].values
 
         self.asteroids_df['asteroid_miss_distance_in_km'] = self.asteroids_df['asteroid_miss_distance_in_km'].\
-            astype('int32')
+            astype('float32')
         self.asteroids_df['asteroid_estimated_diameter_min_in_m'] = \
             self.asteroids_df['asteroid_estimated_diameter_min_in_m'].astype('float16')
         self.asteroids_df['relative_velocity_in_km/s'] = self.asteroids_df['relative_velocity_in_km/s'].astype('float16'
@@ -79,6 +78,7 @@ class DataFrameOfAttributesOfAsteroids:
 
         print(self.asteroids_df.to_string())
         print(self.asteroids_df.info())
+
 
 class GetDatasFromNASA(DataFrameOfAttributesOfAsteroids):
     def __init__(self, api_key, selected_date):
@@ -129,8 +129,6 @@ class JSONFileFunctions:
     def read_json(self, selected_date, data_frame):
         with open(f'{self.file_name}.json', 'r', encoding='utf-8') as f:
             json_file = ujson.load(f)
-            data_frame['close_approach_date_full'] = datetime.isoformat(data_frame['close_approach_date_full'])
-            data_frame = data_frame.to_dict()
             new_dict = {selected_date: [data_frame]}
             json_file['datas'].append(new_dict)
             return json_file
@@ -150,14 +148,16 @@ class DataOperation:
         self.selected_date = None
         self.db_file_name = db_file
 
+        self.asteroids_df_for_select = DataFrame()
+        self.asteroids_df_for_visualization = DataFrame()
         self.selected_asteroid_name = None
-        self.asteroids_df = DataFrame()
         self.asteroid_index = 0
         self.selected_asteroid_in_df = DataFrame()
 
     def clear_listbox_and_selected_item(self):
         self.listbox.delete(0, END)
-        self.asteroids_df = DataFrame()
+        self.asteroids_df_for_select = DataFrame()
+        self.asteroids_df_for_visualization = DataFrame()
 
     def get_datas_from_nasa(self, selected_date):
         list_of_asteroids = GetDatasFromNASA(self.api_key, selected_date)
@@ -165,7 +165,8 @@ class DataOperation:
 
     def store_selected_date_and_asteroids_temporarily(self, selected_date, list_of_asteroids):
         self.selected_date = selected_date
-        self.asteroids_df = concat([list_of_asteroids.asteroids_df])
+        self.asteroids_df_for_select = concat([list_of_asteroids.asteroids_df])
+        self.asteroids_df_for_visualization = concat([list_of_asteroids.asteroids_df])
 
     def requesting_asteroids(self, selected_date):
         self.clear_listbox_and_selected_item()
@@ -173,10 +174,21 @@ class DataOperation:
 
     def insert_asteroids_name_into_listbox(self, selected_date):
         self.requesting_asteroids(selected_date)
-        [self.listbox.insert(END, asteroid) for asteroid in self.asteroids_df['asteroid_name'].values]
+        [self.listbox.insert(END, asteroid) for asteroid in self.asteroids_df_for_select['asteroid_name'].values]
 
     def selecting_asteroid(self):
-        self.selected_asteroid_in_df = concat([self.asteroids_df.iloc[self.asteroid_index]])
+        self.selected_asteroid_in_df = concat([self.asteroids_df_for_select.iloc[self.asteroid_index]])
+
+    def refresh_temporary_dataframe(self, item):
+        self.asteroids_df_for_select = self.asteroids_df_for_select.drop([item])
+        self.asteroids_df_for_select.reset_index(drop=True, inplace=True)
+
+    def send_selected_asteroid_to_json(self):
+        self.selected_asteroid_in_df['close_approach_date_full'] = datetime.isoformat(self.selected_asteroid_in_df
+                                                                                      ['close_approach_date_full'])
+        data_frame = self.selected_asteroid_in_df.to_dict()
+        readed_json = self.json_functions.read_json(self.selected_date, data_frame)
+        self.json_functions.write_to_json(readed_json)
 
     def save_selected_asteroid_from_listbox(self):
         for item in self.listbox.curselection():
@@ -184,7 +196,8 @@ class DataOperation:
             self.asteroid_index = item
             self.selecting_asteroid()
             self.listbox.delete(item)
+            self.refresh_temporary_dataframe(item)
             InsertInto(self.db_file_name, self.selected_asteroid_in_df).select_all_from_table()
-            readed_json = self.json_functions.read_json(self.selected_date, self.selected_asteroid_in_df)
-            self.json_functions.write_to_json(readed_json)
+            self.send_selected_asteroid_to_json()
             messagebox.showinfo("Information", "Asteroid sent.")
+

@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
-from Pysql3test2 import DataOperation, AsteroidsVisualization
+from Pysql3 import DataOperation, AsteroidsVisualization
 
 
 class DateEntry:

@@ -18,11 +18,11 @@ class EvasiveRadar:
         while True:
             radar_map = np.zeros((self.matrix_row, self.matrix_col), dtype=int)
 
-            radar_map[self.row_step, self.obj_col] = 4
+            self.get_incoming_number_position(radar_map)
 
             self.dodge_when_number_incoming(radar_map)
 
-            radar_map[self.matrix_col // 2, self.own_row] = 1
+            self.get_dodging_number_position(radar_map)
 
             time.sleep(1)
 
@@ -49,6 +49,12 @@ class EvasiveRadar:
             self.obj_col += 1
             self.row_step = 0
 
+    def get_incoming_number_position(self, radar_map):
+        radar_map[self.row_step, self.obj_col] = 4
 
-obj = EvasiveRadar(3)
+    def get_dodging_number_position(self, radar_map):
+        radar_map[self.matrix_col // 2, self.own_row] = 1
+
+
+obj = EvasiveRadar(4)
 obj.display_radar()

@@ -36,9 +36,10 @@ class NumberSystemCalculator:
         formatted_list_of_hexa_values = []
 
         for item in list_of_hexa_values:
-            formatted_list_of_hexa_values.append(item.upper())
             if item.isdigit():
                 formatted_list_of_hexa_values.append(int(item))
+            else:
+                formatted_list_of_hexa_values.append(item.upper())
 
         hexa_numbers = {"A": 10, "B": 11, "C": 12, "D": 13, "E": 14, "F": 15}
 
